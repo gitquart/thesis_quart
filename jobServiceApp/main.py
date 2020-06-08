@@ -36,6 +36,7 @@ precedentes_list=['francesa','nota']
 lim_top_fijo=2021819
 lim_bot_fijo=159803
 thesis_added=False
+appPath='/app/jobServiceApp/'
 
 #Chrome configuration
 chrome_options= webdriver.ChromeOptions()
@@ -76,7 +77,7 @@ def readUrl(sense,l_bot,l_top):
     if l_bot==0:
         l_bot=lim_bot_fijo
     
-    with open('thesis_json_base.json') as f:
+    with open(appPath+'thesis_json_base.json') as f:
         json_thesis = json.load(f)
           
     #Onwars for    
@@ -112,7 +113,7 @@ def checkRows():
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
-        'secure_connect_bundle': pathToHere+'secure-connect-dbquart.zip'
+        'secure_connect_bundle': appPath+'secure-connect-dbquart.zip'
     }
     
     auth_provider = PlainTextAuthProvider(objCC.cc_user,objCC.cc_pwd)
@@ -139,7 +140,7 @@ def cassandraBDProcess(json_thesis):
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
-        'secure_connect_bundle': pathToHere+'secure-connect-dbquart.zip'
+        'secure_connect_bundle': appPath+'secure-connect-dbquart.zip'
     }
     
     auth_provider = PlainTextAuthProvider(objCC.cc_user,objCC.cc_pwd)
