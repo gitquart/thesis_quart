@@ -51,8 +51,7 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 
 def main():
-    print('Main program of Quart')
-    print('Adding 9th period thesis to Casssandra...')
+    print('Main program of Quart...9th period ahead')
     res=readUrl(2,0,2000000)
     print(res)  
     print("Main program is done")
@@ -79,7 +78,7 @@ def readUrl(sense,l_bot,l_top):
     
     with open(appPath+'thesis_json_base.json') as f:
         json_thesis = json.load(f)
-    print('Json loaded...')      
+          
     #Onwars for    
     if(sense==1):
         for x in range(l_bot,l_top):
@@ -194,52 +193,13 @@ def cassandraBDProcess(json_thesis):
  
 
 
-"""
-mongoDBProcess:
-    Inserts a document (thesis) in database, this method inserts a new thesis only
-    if this doesn´t exist
 
-
-def mongoDBProcess(json_thesis):
-    
-    objMC=MongoConnection()
-    user=objMC.mc_user
-    pwd=objMC.mc_pwd
-    cluster=objMC.mc_.cluster
-    global thesis_added
-    result=''
-    client = MongoClient("mongodb+srv://"+user+":"+pwd+"@"+cluster+"-mlo2r.azure.mongodb.net/test?retryWrites=true&w=majority")
-    db = client['dbquart']
-    collection=db['all_thesis']
-    #Check if the thesis exists
-    
-    strID=json_thesis['ID']
-    strHeading=json_thesis['content']['heading']
-    
-    
-    
-    
-    result=collection.count_documents(
-                           {'ID':strID,
-                            'content.heading':strHeading}
-                           )
-       
-    
-    if result==0:
-       collection.insert_one(json_thesis)
-       thesis_added=True
-       
-       
-    return thesis_added 
-        
-"""
 """
 uploadThesis:
     Reads the url where the service is fetching data from thesis
 """
 
 def prepareThesis(id_thesis,json_thesis): 
-    print('Prepare thesis method...')
     result=''
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
@@ -248,6 +208,7 @@ def prepareThesis(id_thesis,json_thesis):
     thesis_html = BeautifulSoup(browser.page_source, 'lxml')
     title=thesis_html.find('title')
     title_text=title.text
+    print('Title:'+title_text)
     if title_text.strip() != msg_error: 
         
         json_thesis['id_thesis']=int(strIdThesis)
@@ -324,17 +285,6 @@ def prepareThesis(id_thesis,json_thesis):
         
     return  result
 
-"""
-Objecst to connect to DB
-'mc' prefix to know the variables from MongoConnection class
-
-"""
-"""
-class MongoConnection():
-    mc_user='admin'
-    mc_pwd='v9mIadQx6dWjVDZc'
-    mc_cluster='clustertest'
-"""
     
 class CassandraConnection():
     cc_user='quartadmin'
@@ -346,3 +296,56 @@ class CassandraConnection():
 
 if __name__ == '__main__':
     main()
+    
+    
+"""
+Objecst to connect to DB
+'mc' prefix to know the variables from MongoConnection class
+
+"""
+"""
+class MongoConnection():
+    mc_user='admin'
+    mc_pwd='v9mIadQx6dWjVDZc'
+    mc_cluster='clustertest'
+"""
+
+"""
+mongoDBProcess:
+    Inserts a document (thesis) in database, this method inserts a new thesis only
+    if this doesn´t exist
+
+
+def mongoDBProcess(json_thesis):
+    
+    objMC=MongoConnection()
+    user=objMC.mc_user
+    pwd=objMC.mc_pwd
+    cluster=objMC.mc_.cluster
+    global thesis_added
+    result=''
+    client = MongoClient("mongodb+srv://"+user+":"+pwd+"@"+cluster+"-mlo2r.azure.mongodb.net/test?retryWrites=true&w=majority")
+    db = client['dbquart']
+    collection=db['all_thesis']
+    #Check if the thesis exists
+    
+    strID=json_thesis['ID']
+    strHeading=json_thesis['content']['heading']
+    
+    
+    
+    
+    result=collection.count_documents(
+                           {'ID':strID,
+                            'content.heading':strHeading}
+                           )
+       
+    
+    if result==0:
+       collection.insert_one(json_thesis)
+       thesis_added=True
+       
+       
+    return thesis_added 
+        
+"""
