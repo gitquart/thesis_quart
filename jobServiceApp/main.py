@@ -79,7 +79,7 @@ def readUrl(sense,l_bot,l_top):
     
     with open(appPath+'thesis_json_base.json') as f:
         json_thesis = json.load(f)
-          
+    print('Json loaded...')      
     #Onwars for    
     if(sense==1):
         for x in range(l_bot,l_top):
