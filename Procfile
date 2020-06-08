@@ -1,1 +1,1 @@
-web: python /app/jobServiceApp/main.py
+worker: python /app/jobServiceApp/main.py
