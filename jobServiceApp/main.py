@@ -52,7 +52,7 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 def main():
     print('Main program of Quart...9th period ahead')
-    res=readUrl(2,0,1997156)
+    res=readUrl(2,0,1994831)
     print(res)  
     print("Main program is done")
     
@@ -281,7 +281,6 @@ def prepareThesis(id_thesis,json_thesis):
         thesis_html=''
         result=json_thesis
     else:
-        print('Nope...ID:'+strIdThesis)
         result=''
         
     return  result
