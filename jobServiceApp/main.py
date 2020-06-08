@@ -239,7 +239,7 @@ uploadThesis:
 """
 
 def prepareThesis(id_thesis,json_thesis): 
-
+    print('Prepare thesis method...')
     result=''
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
