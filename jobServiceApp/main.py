@@ -281,6 +281,7 @@ def prepareThesis(id_thesis,json_thesis):
         thesis_html=''
         result=json_thesis
     else:
+        print('Nope:ID-',strIdThesis)
         result=''
         
     return  result
