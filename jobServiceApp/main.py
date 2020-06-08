@@ -90,7 +90,7 @@ def readUrl(sense,l_bot,l_top):
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
                     #if noTesis==3:
-                     #   break
+                    #    break
     #Backwards For             
     if(sense==2):
         for x in range(l_top,l_bot,-1):
@@ -101,8 +101,9 @@ def readUrl(sense,l_bot,l_top):
                 if thesis_added==True:
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
-                    #if noTesis==3:
-                     #   break 
+                    #Know the upper limit
+                    if noTesis==1:
+                        break 
                                    
     browser.quit()  
     
