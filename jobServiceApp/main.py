@@ -208,7 +208,7 @@ def prepareThesis(id_thesis,json_thesis):
     thesis_html = BeautifulSoup(browser.page_source, 'lxml')
     title=thesis_html.find('title')
     title_text=title.text
-    print('ID:'+strIdThesis)
+    
     if title_text.strip() != msg_error: 
         
         json_thesis['id_thesis']=int(strIdThesis)
@@ -281,6 +281,7 @@ def prepareThesis(id_thesis,json_thesis):
         thesis_html=''
         result=json_thesis
     else:
+        print('ID:'+strIdThesis)
         result=''
         
     return  result
