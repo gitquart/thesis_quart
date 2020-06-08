@@ -136,7 +136,7 @@ def checkRows():
 def cassandraBDProcess(json_thesis):
     
     global thesis_added
-    
+    print('Step into cassandra process...')
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
