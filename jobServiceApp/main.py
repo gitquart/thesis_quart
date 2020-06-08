@@ -136,7 +136,7 @@ def checkRows():
 def cassandraBDProcess(json_thesis):
     
     global thesis_added
-
+    
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
@@ -147,7 +147,7 @@ def cassandraBDProcess(json_thesis):
     cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
     session = cluster.connect()
     session.default_timeout=50
-    
+    print('Connected to Cassandra...')
     
     #Get values for query
     #Ejemplo : Décima Época
