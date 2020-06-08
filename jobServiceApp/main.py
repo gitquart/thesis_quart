@@ -52,7 +52,7 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 def main():
     print('Main program of Quart...9th period ahead')
-    res=readUrl(2,0,1999955)
+    res=readUrl(2,0,1997241)
     print(res)  
     print("Main program is done")
     
