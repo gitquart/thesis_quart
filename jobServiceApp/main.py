@@ -52,7 +52,7 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 def main():
     print('Main program of Quart...9th period ahead')
-    res=readUrl(2,0,1930000)  
+    res=readUrl(2,0,210000)  
     print("Main program is done")
     
 """
@@ -92,7 +92,7 @@ def readUrl(sense,l_bot,l_top):
                     #    break
     #Backwards For             
     if(sense==2):
-        for x in range(l_top,l_bot,-10000):
+        for x in range(l_top,l_bot,-1):
             res=prepareThesis(x,json_thesis)
             if(res!=''):
                 #Upload thsis to Cassandra
