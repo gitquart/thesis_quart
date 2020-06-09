@@ -52,7 +52,7 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 def main():
     print('Main program of Quart...9th period ahead')
-    res=readUrl(2,0,210000)  
+    res=readUrl(2,0,400000)  
     print("Main program is done")
     
 """
@@ -101,8 +101,8 @@ def readUrl(sense,l_bot,l_top):
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
                     #Know the upper limit
-                    if noTesis==1:
-                        break 
+                    #if noTesis==1:
+                        #break 
                                    
     browser.quit()  
     
@@ -135,7 +135,6 @@ def checkRows():
 def cassandraBDProcess(json_thesis):
     
     global thesis_added
-    print('Step into cassandra process...')
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
@@ -146,7 +145,6 @@ def cassandraBDProcess(json_thesis):
     cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
     session = cluster.connect()
     session.default_timeout=50
-    print('Connected to Cassandra...')
     
     #Get values for query
     #Ejemplo : Décima Época
