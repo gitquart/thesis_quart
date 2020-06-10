@@ -46,7 +46,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 
 browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chrome_options=chrome_options)
-
+webdriver.implicitly_wait(10)
 #End of chrome configuration
 
 
@@ -203,7 +203,7 @@ def prepareThesis(id_thesis,json_thesis):
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
-    time.sleep(10)
+    time.sleep(1)
     thesis_html = BeautifulSoup(browser.page_source, 'lxml')
     title=thesis_html.find('title')
     print('Title:',title)
