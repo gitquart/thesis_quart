@@ -208,7 +208,7 @@ def prepareThesis(id_thesis,json_thesis):
     thesis_html = BeautifulSoup(content, 'html.parser')
     title=thesis_html.find('title')
     test=thesis_html.find(id='lblTesisBD')
-    print('lblTesisBD:',test.text)
+    print('lblTesisBD:',test)
     if title is not None:
         title_text=title.text
         if title_text.strip() != msg_error: 
