@@ -52,7 +52,8 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 
 def main():
     print('Main program of Quart...9th period ahead')
-    res=readUrl(2,0,400000)  
+    #The limits in readUrl may vary up to the need of the search
+    res=readUrl(2,0,395488)  
     print("Main program is done")
     
 """
