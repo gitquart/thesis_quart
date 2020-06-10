@@ -201,7 +201,6 @@ uploadThesis:
 def prepareThesis(id_thesis,json_thesis): 
     result=''
     strIdThesis=str(id_thesis) 
-    print('Thesis to check:',strIdThesis)
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
     time.sleep(1)
