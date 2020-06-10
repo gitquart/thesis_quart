@@ -15,6 +15,7 @@ https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID=#&Clase=Detalle
 import json
 import time
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
@@ -203,7 +204,9 @@ def prepareThesis(id_thesis,json_thesis):
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
-    time.sleep(20)
+    browser.execute_script('return document.body')
+    time.sleep(1)
+    #WebDriverWait(browser,30).until(lambda x: 'Page 1' in browser.title)
     content = browser.page_source
     print(content)
     thesis_html = BeautifulSoup(content, 'lxml')
