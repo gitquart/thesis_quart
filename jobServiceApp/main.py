@@ -46,7 +46,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 
 browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chrome_options=chrome_options)
-webdriver.implicitly_wait(10)
+browser.implicitly_wait(10)
 #End of chrome configuration
 
 
