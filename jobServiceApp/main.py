@@ -279,9 +279,11 @@ def prepareThesis(id_thesis,json_thesis):
             thesis_html=''
             result=json_thesis
         else:
-            print('Nope:ID-',strIdThesis)
+            print('CustomError:ID:',strIdThesis)
             result=''
-        
+    else:
+        print('Not even title found:',strIdThesis)
+        result=''    
     return  result
 
     
