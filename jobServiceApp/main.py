@@ -203,12 +203,12 @@ def prepareThesis(id_thesis,json_thesis):
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
-    time.sleep(5)
+    time.sleep(1)
     content = browser.page_source.encode('utf-8').strip()
     thesis_html = BeautifulSoup(content, 'html.parser')
     title=thesis_html.find('title')
     test=thesis_html.find(id='lblTesisBD')
-    print('lblTesisBD:',test)
+    print('lblTesisBD:',test.text)
     if title is not None:
         title_text=title.text
         if title_text.strip() != msg_error: 
