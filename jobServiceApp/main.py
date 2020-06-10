@@ -205,10 +205,8 @@ def prepareThesis(id_thesis,json_thesis):
     browser.get(url)
     time.sleep(1)
     content = browser.page_source.encode('utf-8').strip()
-    thesis_html = BeautifulSoup(content, 'html.parser')
+    thesis_html = BeautifulSoup(content, 'lxml')
     title=thesis_html.find('title')
-    test=thesis_html.find(id='lblTesisBD')
-    print('lblTesisBD:',test.text)
     if title is not None:
         title_text=title.text
         if title_text.strip() != msg_error: 
@@ -282,10 +280,10 @@ def prepareThesis(id_thesis,json_thesis):
             thesis_html=''
             result=json_thesis
         else:
-            print('CustomError:ID:',strIdThesis)
+            print('CustomError ID:',strIdThesis)
             result=''
     else:
-        print('Not even title found:',strIdThesis)
+        print('Not title found:',strIdThesis)
         result=''    
     return  result
 
