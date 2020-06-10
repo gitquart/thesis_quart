@@ -1,1 +1,1 @@
-worker: python /app/jobServiceApp/main.py
+worker: python3 /app/jobServiceApp/main.py
