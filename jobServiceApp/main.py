@@ -207,82 +207,81 @@ def prepareThesis(id_thesis,json_thesis):
     time.sleep(1)
     thesis_html = BeautifulSoup(browser.page_source, 'lxml')
     title=thesis_html.find('title')
-    title_text=title.text
-    
-    if title_text.strip() != msg_error: 
-        
-        json_thesis['id_thesis']=int(strIdThesis)
-        #json_thesis['_id']=t =bson.objectid.ObjectId()
-        #Fet values from header, and body of thesis
-        for obj in thesis_id:  
-            field=thesis_html.find(id=obj)
-            if field.text != '':   
-                strField=field.text.strip()
-                if obj==thesis_id[0]:
-                    json_thesis['thesis_number']=strField
-                if obj==thesis_id[1]:
-                    json_thesis['instance']=strField
-                if obj==thesis_id[2]:
-                    json_thesis['source']=strField
-                #Special Case    
-                if obj==thesis_id[3]:
-                    if strField.find(',')!=-1:
-                        chunks=strField.split(',')
+    if title is not None:
+        title_text=title.text
+        if title_text.strip() != msg_error: 
+            json_thesis['id_thesis']=int(strIdThesis)
+            #json_thesis['_id']=t =bson.objectid.ObjectId()
+            #Fet values from header, and body of thesis
+            for obj in thesis_id:  
+                field=thesis_html.find(id=obj)
+                if field.text != '':   
+                    strField=field.text.strip()
+                    if obj==thesis_id[0]:
+                        json_thesis['thesis_number']=strField
+                    if obj==thesis_id[1]:
+                        json_thesis['instance']=strField
+                    if obj==thesis_id[2]:
+                        json_thesis['source']=strField
+                    #Special Case    
+                    if obj==thesis_id[3]:
+                        if strField.find(',')!=-1:
+                            chunks=strField.split(',')
+                            count=len(chunks)
+                            if count==2:
+                                json_thesis['book_number']=chunks[0]
+                                json_thesis['publication_date']=chunks[1]
+                            if count==3:
+                                json_thesis['book_number']=chunks[0]+" "+chunks[2]
+                                json_thesis['publication_date']=chunks[1]
+                        else:
+                            json_thesis['publication_date']=strField
+                    if obj==thesis_id[4]:
+                        json_thesis['period']=strField
+                    if obj==thesis_id[5]:
+                        json_thesis['page']=strField
+                    #Special case :
+                    #Type of jurispricende (Type of thesis () )
+                    if obj==thesis_id[6]:
+                        strField=strField.replace(')','')
+                        chunks=strField.split('(')
                         count=len(chunks)
-                        if count==2:
-                            json_thesis['book_number']=chunks[0]
-                            json_thesis['publication_date']=chunks[1]
-                        if count==3:
-                            json_thesis['book_number']=chunks[0]+" "+chunks[2]
-                            json_thesis['publication_date']=chunks[1]
-                    else:
-                        json_thesis['publication_date']=strField
-                if obj==thesis_id[4]:
-                    json_thesis['period']=strField
-                if obj==thesis_id[5]:
-                    json_thesis['page']=strField
-                #Special case :
-                #Type of jurispricende (Type of thesis () )
-                if obj==thesis_id[6]:
-                    strField=strField.replace(')','')
-                    chunks=strField.split('(')
-                    count=len(chunks)
-                    if count==2: 
-                        json_thesis['type_of_thesis']=chunks[0]
-                        json_thesis['subject']=chunks[1]
+                        if count==2: 
+                            json_thesis['type_of_thesis']=chunks[0]
+                            json_thesis['subject']=chunks[1]
                         
-                    if count==3:
-                        json_thesis['jurisprudence_type']=chunks[0]
-                        json_thesis['type_of_thesis']=chunks[1]
-                        json_thesis['subject']=chunks[2] 
+                        if count==3:
+                            json_thesis['jurisprudence_type']=chunks[0]
+                            json_thesis['type_of_thesis']=chunks[1]
+                            json_thesis['subject']=chunks[2] 
 
-                if obj==thesis_id[7]:
-                    json_thesis['heading']=strField.replace("'",',')
-                if obj==thesis_id[8]:
-                    json_thesis['text_content']=strField.replace("'",',') 
-                if obj==thesis_id[9]:  
-                    children=thesis_html.find_all(id=obj)
-                    for child in children:
-                        for p in precedentes_list:   
-                            preced=child.find_all(class_=p)
-                            for ele in preced:
-                                if ele.text!='':
-                                    strValue=ele.text.strip()
-                                    json_thesis['lst_precedents'].append(strValue.replace("'",','))
+                    if obj==thesis_id[7]:
+                        json_thesis['heading']=strField.replace("'",',')
+                    if obj==thesis_id[8]:
+                        json_thesis['text_content']=strField.replace("'",',') 
+                    if obj==thesis_id[9]:  
+                        children=thesis_html.find_all(id=obj)
+                        for child in children:
+                            for p in precedentes_list:   
+                                preced=child.find_all(class_=p)
+                                for ele in preced:
+                                    if ele.text!='':
+                                        strValue=ele.text.strip()
+                                        json_thesis['lst_precedents'].append(strValue.replace("'",','))
 
                 
-        for obj in thesis_class:
-            field=thesis_html.find(class_=obj)
-            if field.text != '':   
-                strField=field.text.strip()
-                if obj==thesis_class[0]:
-                    json_thesis['publication']=strField
+            for obj in thesis_class:
+                field=thesis_html.find(class_=obj)
+                if field.text != '':   
+                    strField=field.text.strip()
+                    if obj==thesis_class[0]:
+                        json_thesis['publication']=strField
    
-        thesis_html=''
-        result=json_thesis
-    else:
-        print('Nope:ID-',strIdThesis)
-        result=''
+            thesis_html=''
+            result=json_thesis
+        else:
+            print('Nope:ID-',strIdThesis)
+            result=''
         
     return  result
 
