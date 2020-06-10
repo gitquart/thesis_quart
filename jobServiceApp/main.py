@@ -207,6 +207,7 @@ def prepareThesis(id_thesis,json_thesis):
     content = browser.page_source.encode('utf-8').strip()
     thesis_html = BeautifulSoup(content, 'lxml')
     title=thesis_html.find('title')
+    print(browser.page_source)
     if title is not None:
         title_text=title.text
         if title_text.strip() != msg_error: 
