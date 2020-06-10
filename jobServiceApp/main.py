@@ -204,8 +204,7 @@ def prepareThesis(id_thesis,json_thesis):
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
-    browser.execute_script('return document.body')
-    time.sleep(1)
+    time.sleep(1000)
     #WebDriverWait(browser,30).until(lambda x: 'Page 1' in browser.title)
     content = browser.page_source
     print(content)
