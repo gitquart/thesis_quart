@@ -204,7 +204,8 @@ def prepareThesis(id_thesis,json_thesis):
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
     time.sleep(1)
-    thesis_html = BeautifulSoup(browser.page_source, 'lxml')
+    content = browser.page_source.encode('utf-8').strip()
+    thesis_html = BeautifulSoup(content, 'lxml')
     title=thesis_html.find('title')
     print('Title:',title)
     if title is not None:
