@@ -86,7 +86,7 @@ def readUrl(sense,l_bot,l_top):
             res=prepareThesis(x,json_thesis)
             if(res!=''):
                 #Upload thsis to Cassandra
-                thesis_added=cassandraBDProcess(res)  
+                thesis_added=cassandraBDProcess(1,res)  
                 if thesis_added==True:
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
@@ -110,31 +110,11 @@ def readUrl(sense,l_bot,l_top):
     
     return ''
     
-def checkRows():
-    #Connect to Cassandra
-    objCC=CassandraConnection()
-    cloud_config= {
-        'secure_connect_bundle': appPath+'secure-connect-dbquart.zip'
-    }
-    
-    auth_provider = PlainTextAuthProvider(objCC.cc_user,objCC.cc_pwd)
-    cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
-    session = cluster.connect()
-    session.default_timeout=1000
-    session.default_fetch_size=500
+
     
 
-    print('Hang on...getting rows...')
-    
-    querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
-    
-    row = session.execute(querySt)
 
-    if row:
-        print('Thesis so far in period 9:',row[0][0])
-       
-
-def cassandraBDProcess(json_thesis):
+def cassandraBDProcess(op,json_thesis):
     
     global thesis_added
     #Connect to Cassandra
@@ -143,6 +123,7 @@ def cassandraBDProcess(json_thesis):
         'secure_connect_bundle': appPath+'secure-connect-dbquart.zip'
     }
     
+    
     auth_provider = PlainTextAuthProvider(objCC.cc_user,objCC.cc_pwd)
     cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
     session = cluster.connect()
@@ -150,42 +131,51 @@ def cassandraBDProcess(json_thesis):
     
     #Get values for query
     #Ejemplo : Décima Época
-
-    period=json_thesis['period']
-    period=period.lower()
+    if op==1:
+          period=json_thesis['period']
+        period=period.lower()
     
-    if period=='novena época':
-        idThesis=json_thesis['id_thesis']
-        heading=json_thesis['heading']
-        #Check wheter or not the record exists
-        querySt="select * from thesis.tbthesis where id_thesis="+str(idThesis)+" and heading='"+heading+"'"
+        if period=='novena época':
+            idThesis=json_thesis['id_thesis']
+            heading=json_thesis['heading']
+            #Check wheter or not the record exists
+            querySt="select * from thesis.tbthesis where id_thesis="+str(idThesis)+" and heading='"+heading+"'"
     
-        future = session.execute_async(querySt)
-        row=future.result()
-
-        if row: 
-            thesis_added=False
-        else:
-            #Insert Data as JSON
-            json_thesis=json.dumps(json_thesis)
-            #wf.appendInfoToFile(dirquarttest,str(idThesis)+'.json', json_thesis)
-            insertSt="INSERT INTO thesis.tbthesis JSON '"+json_thesis+"';"
-            future = session.execute_async(insertSt)
-            future.result() 
-
-            #Update count for table
-            row=''
-            querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
             future = session.execute_async(querySt)
             row=future.result()
-            
-            if row:
-                total=int(row[0][0])+1
-                updateSt="update thesis.tbthesis_per_period set no_thesis="+str(total)+" where id_period=9"
-                future=session.execute_async(updateSt)
+
+            if row: 
+                thesis_added=False
+            else:
+                #Insert Data as JSON
+                json_thesis=json.dumps(json_thesis)
+                #wf.appendInfoToFile(dirquarttest,str(idThesis)+'.json', json_thesis)
+                insertSt="INSERT INTO thesis.tbthesis JSON '"+json_thesis+"';"
+                future = session.execute_async(insertSt)
                 future.result() 
 
-            thesis_added=True
+                #Update count for table
+                row=''
+                querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
+                future = session.execute_async(querySt)
+                row=future.result()
+            
+                if row:
+                    total=int(row[0][0])+1
+                    updateSt="update thesis.tbthesis_per_period set no_thesis="+str(total)+" where id_period=9"
+                    future=session.execute_async(updateSt)
+                    future.result() 
+
+                thesis_added=True
+                
+            if op==2:
+                print('Getting number of rows...')
+                querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
+                row = session.execute(querySt)
+
+                if row:
+                    print('Thesis so far in period 9:',row[0][0])
+                    
     
 
     cluster.shutdown()          
@@ -204,7 +194,7 @@ def prepareThesis(id_thesis,json_thesis):
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
     browser.get(url)
-    time.sleep(30)
+    time.sleep(1)
     #WebDriverWait(browser,30).until(lambda x: 'Page 1' in browser.title)
     content = browser.page_source
     print(content)
@@ -302,7 +292,7 @@ class CassandraConnection():
 if __name__ == '__main__':
     main()
     
-    
+#The following code may be useful again    
 """
 Objecst to connect to DB
 'mc' prefix to know the variables from MongoConnection class
