@@ -31,6 +31,7 @@ msg_error="Custom Error"
 thesis_id=[ 'lblTesisBD','lblInstancia','lblFuente','lblLocMesAño','lblEpoca','lblLocPagina','lblTJ','lblRubro','lblTexto','lblPrecedentes']
 thesis_class=['publicacion']
 precedentes_list=['francesa','nota']
+ls_months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
 #Standard top limit=2021819
 #Standard bottom limit 159803
 #Limit for 9th period 2 000 000 (it is supplied in main function)
@@ -194,38 +195,13 @@ def cassandraBDProcess(op,json_thesis):
                 idThesis=row[2]
                 pub_date=str(row[0]).strip()
                 period_number=str(row[1]).strip()
-                if pub_date!='':
-                    if pub_date.find(':')!=-1:
-                        main_chunk=pub_date.split(':')
-                        # Day month year and hour
-                        data=main_chunk[1].strip()
-                        chunks=data.split(' ')
-                        day=str(chunks[1].strip())
-                        month=str(chunks[3].strip())
-                        year=str(chunks[5].strip()) 
-                        case=1      
-                    elif pub_date.find(' ')!=-1:
-                        chunks=pub_date.split(' ')
-                        month=chunks[0].strip()
-                        year=chunks[2].strip()
-                        case=2
-                        
-                    month_lower=month.lower()
-                    for item in ls_months:
-                        if month_lower==item:
-                            month=str(ls_months.index(item)+1)
-                            if len(month)==1:
-                                month='0'+month
-                            break
-                    #
-                    complete_date=year+'-'+month+'-'+'01'
-                            
-                    if period_number!='10':
-                        updateSt="update thesis.tbthesis set period_number=10 , dt_publication_date='"+complete_date+"' where id_thesis="+str(idThesis)+""
-                        future = session.execute_async(updateSt)
-                        res= future.result();    
-                        print(idThesis,': updated')
-                        count=count+1
+                complete_date=getCompleteDate(pub_date)
+                if period_number!='10':
+                    updateSt="update thesis.tbthesis set period_number=10 , dt_publication_date='"+complete_date+"' where id_thesis="+str(idThesis)+""
+                    future = session.execute_async(updateSt)
+                    res= future.result();    
+                    print(idThesis,': updated')
+                    count=count+1
                         
                 #if count==5:
                     #break
@@ -334,6 +310,30 @@ def prepareThesis(id_thesis,json_thesis):
         print('Not title found:',strIdThesis)
         result=''    
     return  result
+
+def getCompleteDate(pub_date):
+    if pub_date!='':
+        if pub_date.find(':')!=-1:
+            main_chunk=pub_date.split(':')
+            # Day month year and hour
+            data=main_chunk[1].strip()
+            chunks=data.split(' ')
+            day=str(chunks[1].strip())
+            month=str(chunks[3].strip())
+            year=str(chunks[5].strip())     
+        elif pub_date.find(' ')!=-1:
+            chunks=pub_date.split(' ')
+            month=chunks[0].strip()
+            year=chunks[2].strip()
+        month_lower=month.lower()
+        for item in ls_months:
+            if month_lower==item:
+                month=str(ls_months.index(item)+1)
+                if len(month)==1:
+                    month='0'+month
+                    break
+                    
+    return complete_date=year+'-'+month+'-'+'01'
 
     
 class CassandraConnection():
