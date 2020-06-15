@@ -37,9 +37,11 @@ precedentes_list=['francesa','nota']
 lim_top_fijo=2021819
 lim_bot_fijo=159803
 thesis_added=False
-appPath='/app/jobServiceApp/'
+#appPath='/app/jobServiceApp/'
+appPath='/Users/ulysesrico/respaldomaculy/quart/appsquart/appThesisjobservice/jobserviceapp/'
 
 #Chrome configuration
+"""
 chrome_options= webdriver.ChromeOptions()
 chrome_options.binary_location=os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--headless")
@@ -49,12 +51,14 @@ chrome_options.add_argument("--no-sandbox")
 browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chrome_options=chrome_options)
 #browser.implicitly_wait(10)
 #End of chrome configuration
+"""
 
 
 def main():
-    print('Main program of Quart...9th period ahead')
+    print('Updating data 10th period')
     #The limits in readUrl may vary up to the need of the search
-    res=readUrl(2,0,395488)  
+    #res=readUrl(2,0,395488)
+    cassandraBDProcess(3,'')  
     print("Main program is done")
     
 """
@@ -132,7 +136,7 @@ def cassandraBDProcess(op,json_thesis):
     #Get values for query
     #Ejemplo : Décima Época
     if op==1:
-          period=json_thesis['period']
+        period=json_thesis['period']
         period=period.lower()
     
         if period=='novena época':
@@ -168,16 +172,67 @@ def cassandraBDProcess(op,json_thesis):
 
                 thesis_added=True
                 
-            if op==2:
-                print('Getting number of rows...')
-                querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
-                row = session.execute(querySt)
+    if op==2:
+        print('Getting number of rows...')
+        querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
+        row = session.execute(querySt)
 
-                if row:
-                    print('Thesis so far in period 9:',row[0][0])
-                    
-    
-
+        if row:
+            print('Thesis so far in period 9:',row[0][0])
+            
+    if op==3:
+        print('Updating started...')
+        querySt="select publication_date,period_number,id_thesis from thesis.tbthesis where period='Décima Época'"
+        future = session.execute_async(querySt)
+        res= future.result();
+        count=0
+        case=0        
+        if res:
+            ls_months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+            for row in res:
+                
+                idThesis=row[2]
+                pub_date=str(row[0]).strip()
+                period_number=str(row[1]).strip()
+                if pub_date!='':
+                    if pub_date.find(':')!=-1:
+                        main_chunk=pub_date.split(':')
+                        # Day month year and hour
+                        data=main_chunk[1].strip()
+                        chunks=data.split(' ')
+                        day=str(chunks[1].strip())
+                        month=str(chunks[3].strip())
+                        year=str(chunks[5].strip()) 
+                        case=1      
+                    elif pub_date.find(' ')!=-1:
+                        chunks=pub_date.split(' ')
+                        month=chunks[0].strip()
+                        year=chunks[2].strip()
+                        case=2
+                        
+                    month_lower=month.lower()
+                    for item in ls_months:
+                        if month_lower==item:
+                            month=str(ls_months.index(item)+1)
+                            if len(month)==1:
+                                month='0'+month
+                            break
+                    #
+                    complete_date=year+'-'+month+'-'+'01'
+                            
+                    if period_number!='10':
+                        updateSt="update thesis.tbthesis set period_number=10 , dt_publication_date='"+complete_date+"' where id_thesis="+str(idThesis)+""
+                        future = session.execute_async(updateSt)
+                        res= future.result();    
+                        print(idThesis,': updated')
+                        count=count+1
+                        
+                #if count==5:
+                    #break
+                            
+        print('Total of thesis updated:',count)                    
+                                                  
+            
     cluster.shutdown()          
     return thesis_added
  
