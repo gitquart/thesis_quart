@@ -333,7 +333,7 @@ def getCompleteDate(pub_date):
                     month='0'+month
                     break
                     
-    return complete_date=year+'-'+month+'-'+'01'
+    return year+'-'+month+'-'+'01'
 
     
 class CassandraConnection():
