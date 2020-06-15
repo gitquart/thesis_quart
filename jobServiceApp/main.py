@@ -38,8 +38,8 @@ ls_months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','se
 lim_top_fijo=2021819
 lim_bot_fijo=159803
 thesis_added=False
-appPath='/app/jobServiceApp/'
-#appPath='/Users/ulysesrico/respaldomaculy/quart/appsquart/appThesisjobservice/jobserviceapp/'
+#appPath='/app/jobServiceApp/'
+appPath='/Users/ulysesrico/respaldomaculy/quart/appsquart/appThesisjobservice/jobserviceapp/'
 
 #Chrome configuration
 """
