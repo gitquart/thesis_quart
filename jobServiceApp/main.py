@@ -59,7 +59,7 @@ def main():
     print('Updating data 10th period')
     #The limits in readUrl may vary up to the need of the search
     #res=readUrl(2,0,395488)
-    cassandraBDProcess(3,'')  
+    #cassandraBDProcess(3,'')  
     print("Main program is done")
     
 """
