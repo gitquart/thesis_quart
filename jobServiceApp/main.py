@@ -165,51 +165,7 @@ def cassandraBDProcess(op,json_thesis,period_num):
             future.result()  
             thesis_added=True
             cluster.shutdown()     
-            
-    
-    if op==4:
-
-        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
-        session = cluster.connect()
-        session.default_timeout=70
-        
-        row=''
-        count=0
-        print('Deleting...')
-        querySt="select id_thesis from thesis.tbthesis where period_number="+str(period_num)+"" 
-        row = session.execute(querySt)
-        if row:
-            for r in row:
-                strId=str(r[0])
-                deleteSt='delete from thesis.tbthesis where id_thesis='+strId+''
-                count=count+1
-                session.execute(deleteSt)
-                
-        print('Deleted:',str(count))  
-        cluster.shutdown()      
-                
-    if op==5:
-
-        session = cluster.connect()
-        session.default_timeout=70
-        print('Updating started...')
-        querySt="select id_thesis from thesis.tbthesis where period='Décima Época'"
-        future = session.execute_async(querySt)
-        res= future.result();
-        count=0
-        if res:
-            for row in res:
-                print('Hang on...')
-                idThesis=row[0]                
-                updateSt="update thesis.tbthesis set period_number=10  where id_thesis="+str(idThesis)+""
-                future = session.execute_async(updateSt)
-                res= future.result();    
-                print(idThesis,': updated')
-                count=count+1
-            
-                            
-        print('Total of thesis updated:',count)  
-        cluster.shutdown()          
+                    
                          
     return thesis_added
 
