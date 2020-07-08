@@ -165,26 +165,6 @@ def cassandraBDProcess(op,json_thesis,period_num):
             future.result()  
             thesis_added=True
             cluster.shutdown()     
-                
-                
-    if op==3:
-
-        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
-        session = cluster.connect()
-        session.default_timeout=70
-        
-        row=''
-        print('Counting rows from main table tbthesis...')
-       
-        querySt="select id_thesis from thesis.tbthesis where period_number="+str(period_num)+" "   
-        
-        count=0
-        statement = SimpleStatement(querySt, fetch_size=1000)
-        for row in session.execute(statement):
-            count=count+1
-        
-        print('Count',str(count))   
-        cluster.shutdown() 
             
     
     if op==4:
