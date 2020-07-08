@@ -59,15 +59,16 @@ browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chr
 def main():
     print('Running program...')
     #The limits in readUrl may vary up to the need of the search
-    res=readUrl(1,370440,382937,0)  
+    #res=readUrl(1,370440,382937,0)  
     print("Main program is done")
-    
+  
+  
 """
 readUrl
 
 Reads the url from the jury web site
 """
-
+"""
 def readUrl(sense,l_bot,l_top,period):
     
     res=''
@@ -119,7 +120,9 @@ def readUrl(sense,l_bot,l_top,period):
     browser.quit()  
     
     return 'It is all done'
-              
+"""
+   
+"""              
 def cassandraBDProcess(op,json_thesis,period_num):
     
     global thesis_added
@@ -170,6 +173,7 @@ def cassandraBDProcess(op,json_thesis,period_num):
                     
                          
     return thesis_added
+"""
 
 
      
@@ -178,7 +182,7 @@ def cassandraBDProcess(op,json_thesis,period_num):
 prepareThesis:
     Reads the url where the service is fetching data from thesis
 """
-
+"""
 def prepareThesis(id_thesis,json_thesis,period): 
     
     result=''
@@ -300,8 +304,9 @@ def prepareThesis(id_thesis,json_thesis,period):
         result=''
         
     return  result
+"""
 
-
+"""
 def getCompleteDate(pub_date):
     pub_date=pub_date.strip()
     if pub_date!='':
@@ -328,23 +333,17 @@ def getCompleteDate(pub_date):
                 
     completeDate=year+'-'+month+'-'+'01'                   
     return completeDate
+"""
 
 """
 Objecst to connect to DB
 'mc' prefix to know the variables from MongoConnection class
 
 """
-
+"""
 def getIDLimit(sense,l_bot,l_top,period):
     
-    """
-    if period==9:
-        strperiod='Novena Época'
-    if period==10:
-        strperiod='Décima Época'
-    """   
-    if period==0:
-        strperiod='None'
+  
     #Onwars for    
     if(sense==1):
         for x in range(l_bot,l_top):
@@ -358,7 +357,8 @@ def getIDLimit(sense,l_bot,l_top,period):
             res=searchInUrl(x,strperiod)
             if res==1:
                 break
-            
+"""            
+"""            
 def searchInUrl(x,strperiod):
     strIdThesis=str(x) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
@@ -378,12 +378,15 @@ def searchInUrl(x,strperiod):
                 if data.strip()!='Décima Época' and data.strip()!='Novena Época':
                     print('ID for ',strperiod,' found in :',strIdThesis)
                     return 1
+"""                
                     
 
-    
+"""    
 class CassandraConnection():
     cc_user='quartadmin'
     cc_keyspace='thesis'
     cc_pwd='P@ssw0rd33'
     cc_databaseID='9de16523-0e36-4ff0-b388-44e8d0b1581f'
+"""    
         
+       
