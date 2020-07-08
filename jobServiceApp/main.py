@@ -15,7 +15,6 @@ https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID=#&Clase=Detalle
 import json
 import time
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
@@ -38,11 +37,11 @@ ls_months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','se
 lim_top_fijo=2021819
 lim_bot_fijo=159803
 thesis_added=False
-#appPath='/app/jobServiceApp/'
-appPath='/Users/ulysesrico/respaldomaculy/quart/appsquart/appThesisjobservice/jobserviceapp/'
+appPath='/app/jobServiceApp/'
+#appPath='/Users/ulysesrico/respaldomaculy/quart/appsquart/appThesisjobservice/jobserviceapp/'
 
 #Chrome configuration
-"""
+
 chrome_options= webdriver.ChromeOptions()
 chrome_options.binary_location=os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--headless")
@@ -50,16 +49,15 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 
 browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chrome_options=chrome_options)
-#browser.implicitly_wait(10)
+
 #End of chrome configuration
-"""
+
 
 
 def main():
-    print('Updating data 10th period')
+    print('Running program...')
     #The limits in readUrl may vary up to the need of the search
-    #res=readUrl(2,0,395488)
-    #cassandraBDProcess(3,'')  
+    res=readUrl(1,370440,383156,0)  
     print("Main program is done")
     
 """
@@ -68,174 +66,215 @@ readUrl
 Reads the url from the jury web site
 """
 
-def readUrl(sense,l_bot,l_top):
+def readUrl(sense,l_bot,l_top,period):
     
     res=''
     #Can use noTesis as test variable too
     noTesis=0
+    strField=''
+    
     #Import JSON file
     print('Starting process...')
-    print('Only uploaded thesis will appear...')
     
     if l_top==0:
         l_top=lim_top_fijo
     if l_bot==0:
         l_bot=lim_bot_fijo
     
-    with open(appPath+'thesis_json_base.json') as f:
+    with open('thesis_json_base.json') as f:
         json_thesis = json.load(f)
           
     #Onwars for    
     if(sense==1):
         for x in range(l_bot,l_top):
-            res=prepareThesis(x,json_thesis)
+            print('Current thesis:',str(x))
+            res=prepareThesis(x,json_thesis,period)
+            #wf.appendInfoToFile(pathToHere+'tests/',str(x)+'.json',json.dumps(json_thesis))
             if(res!=''):
-                #Upload thsis to Cassandra
-                thesis_added=cassandraBDProcess(1,res)  
+                thesis_added=cassandraBDProcess(1,res,period) 
+                #thesis_added=True 
                 if thesis_added==True:
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
                     #if noTesis==3:
-                    #    break
+                    #   break
     #Backwards For             
     if(sense==2):
-        for x in range(l_top,l_bot,-1):
-            res=prepareThesis(x,json_thesis)
+        for x in range(l_top,l_bot,-1): 
+            print('Current thesis:',str(x))
+            res=prepareThesis(x,json_thesis,period)
+            #wf.appendInfoToFile(pathToHere+'tests/',str(x)+'.json',json.dumps(json_thesis))
             if(res!=''):
-                #Upload thsis to Cassandra
-                thesis_added=cassandraBDProcess(res)  
+                #Upload thsis to Cassandra 
+                thesis_added=cassandraBDProcess(1,res,period) 
+                #thesis_added=True 
                 if thesis_added==True:
                     noTesis=noTesis+1
                     print('Thesis ready: ',noTesis, "-ID: ",x)
-                    #Know the upper limit
-                    #if noTesis==1:
-                        #break 
+                    #if noTesis==3:
+                    #    break 
                                    
     browser.quit()  
     
-    return ''
-    
-
-    
-
-
-def cassandraBDProcess(op,json_thesis):
+    return 'It is all done'
+              
+def cassandraBDProcess(op,json_thesis,period_num):
     
     global thesis_added
+    global row
+
     #Connect to Cassandra
     objCC=CassandraConnection()
     cloud_config= {
         'secure_connect_bundle': appPath+'secure-connect-dbquart.zip'
     }
     
-    
     auth_provider = PlainTextAuthProvider(objCC.cc_user,objCC.cc_pwd)
-    cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
-    session = cluster.connect()
-    session.default_timeout=50
     
-    #Get values for query
-    #Ejemplo : Décima Época
     if op==1:
+        
+        #Get values for query
+        #Ejemplo : Décima Época
+        thesis_added=False
         period=json_thesis['period']
         period=period.lower()
     
-        if period=='novena época':
-            idThesis=json_thesis['id_thesis']
-            heading=json_thesis['heading']
-            #Check wheter or not the record exists
-            querySt="select * from thesis.tbthesis where id_thesis="+str(idThesis)+" and heading='"+heading+"'"
-    
-            future = session.execute_async(querySt)
-            row=future.result()
-
-            if row: 
-                thesis_added=False
-            else:
-                #Insert Data as JSON
-                json_thesis=json.dumps(json_thesis)
-                #wf.appendInfoToFile(dirquarttest,str(idThesis)+'.json', json_thesis)
-                insertSt="INSERT INTO thesis.tbthesis JSON '"+json_thesis+"';"
-                future = session.execute_async(insertSt)
-                future.result() 
-
-                #Update count for table
-                row=''
-                querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
-                future = session.execute_async(querySt)
-                row=future.result()
-            
-                if row:
-                    total=int(row[0][0])+1
-                    updateSt="update thesis.tbthesis_per_period set no_thesis="+str(total)+" where id_period=9"
-                    future=session.execute_async(updateSt)
-                    future.result() 
-
-                thesis_added=True
+        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
+        session = cluster.connect()
+        session.default_timeout=70
+        row=''
+        idThesis=json_thesis['id_thesis']
+        heading=json_thesis['heading']
+        #Check wheter or not the record exists
+           
+        querySt="select id_thesis from thesis.tbthesis where id_thesis="+str(idThesis)+" and heading='"+heading+"'"
                 
-    if op==2:
-        print('Getting number of rows...')
-        querySt="select no_thesis from thesis.tbthesis_per_period where id_period=9"
-        row = session.execute(querySt)
-
-        if row:
-            print('Thesis so far in period 9:',row[0][0])
-            
+        future = session.execute_async(querySt)
+        row=future.result()
+        
+        if row: 
+            thesis_added=False
+            cluster.shutdown()
+        else:
+                
+            #Insert Data as JSON
+            json_thesis=json.dumps(json_thesis)
+            #wf.appendInfoToFile(dirquarttest,str(idThesis)+'.json', json_thesis)                
+            insertSt="INSERT INTO thesis.tbthesis JSON '"+json_thesis+"';" 
+            future = session.execute_async(insertSt)
+            future.result()  
+            thesis_added=True
+            cluster.shutdown()     
+                
+                
     if op==3:
+
+        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
+        session = cluster.connect()
+        session.default_timeout=70
+        
+        row=''
+        print('Counting rows from main table tbthesis...')
+       
+        querySt="select id_thesis from thesis.tbthesis where period_number="+str(period_num)+" "   
+        
+        count=0
+        statement = SimpleStatement(querySt, fetch_size=1000)
+        for row in session.execute(statement):
+            count=count+1
+        
+        print('Count',str(count))   
+        cluster.shutdown() 
+            
+    
+    if op==4:
+
+        cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
+        session = cluster.connect()
+        session.default_timeout=70
+        
+        row=''
+        count=0
+        print('Deleting...')
+        querySt="select id_thesis from thesis.tbthesis where period_number="+str(period_num)+"" 
+        row = session.execute(querySt)
+        if row:
+            for r in row:
+                strId=str(r[0])
+                deleteSt='delete from thesis.tbthesis where id_thesis='+strId+''
+                count=count+1
+                session.execute(deleteSt)
+                
+        print('Deleted:',str(count))  
+        cluster.shutdown()      
+                
+    if op==5:
+
+        session = cluster.connect()
+        session.default_timeout=70
         print('Updating started...')
-        querySt="select publication_date,period_number,id_thesis from thesis.tbthesis where period='Décima Época'"
+        querySt="select id_thesis from thesis.tbthesis where period='Décima Época'"
         future = session.execute_async(querySt)
         res= future.result();
         count=0
-        case=0        
         if res:
-            ls_months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
             for row in res:
-                
-                idThesis=row[2]
-                pub_date=str(row[0]).strip()
-                period_number=str(row[1]).strip()
-                complete_date=getCompleteDate(pub_date)
-                if period_number!='10':
-                    updateSt="update thesis.tbthesis set period_number=10 , dt_publication_date='"+complete_date+"' where id_thesis="+str(idThesis)+""
-                    future = session.execute_async(updateSt)
-                    res= future.result();    
-                    print(idThesis,': updated')
-                    count=count+1
-                        
-                #if count==5:
-                    #break
-                            
-        print('Total of thesis updated:',count)                    
-                                                  
+                print('Hang on...')
+                idThesis=row[0]                
+                updateSt="update thesis.tbthesis set period_number=10  where id_thesis="+str(idThesis)+""
+                future = session.execute_async(updateSt)
+                res= future.result();    
+                print(idThesis,': updated')
+                count=count+1
             
-    cluster.shutdown()          
+                            
+        print('Total of thesis updated:',count)  
+        cluster.shutdown()          
+                         
     return thesis_added
- 
 
 
+     
 
 """
-uploadThesis:
+prepareThesis:
     Reads the url where the service is fetching data from thesis
 """
 
-def prepareThesis(id_thesis,json_thesis): 
+def prepareThesis(id_thesis,json_thesis,period): 
+    
     result=''
     strIdThesis=str(id_thesis) 
     url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
-    browser.get(url)
-    time.sleep(1)
-    #WebDriverWait(browser,30).until(lambda x: 'Page 1' in browser.title)
-    content = browser.page_source
-    print(content)
-    thesis_html = BeautifulSoup(content, 'lxml')
-    title=thesis_html.find('title')
-    if title is not None:
+    response= requests.get(url)
+    status= response.status_code
+    if status==200:
+        browser.get(url)
+        time.sleep(1)
+        thesis_html = BeautifulSoup(browser.page_source, 'lxml')
+        title=thesis_html.find('title')
         title_text=title.text
-        if title_text.strip() != msg_error: 
+        if title_text.strip() != msg_error:  
+            #Clear Json  
+            json_thesis['id_thesis']=''
+            json_thesis['lst_precedents'].clear()
+            json_thesis['thesis_number']=''
+            json_thesis['instance']=''
+            json_thesis['source']=''
+            json_thesis['book_number']=''  
+            json_thesis['publication_date']='' 
+            json_thesis['dt_publication_date']=''
+            json_thesis['period']=''
+            json_thesis['page']=''
+            json_thesis['jurisprudence_type']=''
+            json_thesis['type_of_thesis']=''
+            json_thesis['subject']=''
+            json_thesis['heading']=''
+            json_thesis['text_content']=''
+            json_thesis['publication']=''
+            
+            
             json_thesis['id_thesis']=int(strIdThesis)
-            #json_thesis['_id']=t =bson.objectid.ObjectId()
             #Fet values from header, and body of thesis
             for obj in thesis_id:  
                 field=thesis_html.find(id=obj)
@@ -249,23 +288,33 @@ def prepareThesis(id_thesis,json_thesis):
                         json_thesis['source']=strField
                     #Special Case    
                     if obj==thesis_id[3]:
-                        if strField.find(',')!=-1:
-                            chunks=strField.split(',')
-                            count=len(chunks)
-                            if count==2:
-                                json_thesis['book_number']=chunks[0]
-                                json_thesis['publication_date']=chunks[1]
-                            if count==3:
-                                json_thesis['book_number']=chunks[0]+" "+chunks[2]
-                                json_thesis['publication_date']=chunks[1]
+                        if strField=='.':
+                            json_thesis['book_number']=''  
+                            json_thesis['publication_date']='' 
+                            json_thesis['dt_publication_date']='1000-01-01'
                         else:
-                            json_thesis['publication_date']=strField
+                            json_thesis['book_number']=strField  
+                            json_thesis['publication_date']='' 
+                            json_thesis['dt_publication_date']='1000-01-01' 
+                                                
                     if obj==thesis_id[4]:
                         json_thesis['period']=strField
+                        if strField=='Quinta Época':
+                            json_thesis['period_number']=5
+                        if strField=='Sexta Época':
+                            json_thesis['period_number']=6
+                        if strField=='Séptima Época':
+                            json_thesis['period_number']=7
+                        if strField=='Octava Época':
+                            json_thesis['period_number']=8        
+                        if strField=='Novena Época':
+                            json_thesis['period_number']=9
+                        if strField=='Décima Época':
+                            json_thesis['period_number']=10       
                     if obj==thesis_id[5]:
                         json_thesis['page']=strField
                     #Special case :
-                    #Type of jurispricende (Type of thesis () )
+                    #Type of jurispricende: pattern => (Type of thesis () )
                     if obj==thesis_id[6]:
                         strField=strField.replace(')','')
                         chunks=strField.split('(')
@@ -301,30 +350,36 @@ def prepareThesis(id_thesis,json_thesis):
                     if obj==thesis_class[0]:
                         json_thesis['publication']=strField
    
-            thesis_html=''
-            result=json_thesis
-        else:
-            print('CustomError ID:',strIdThesis)
+        thesis_html=''
+        result=json_thesis
+        
+        if title_text.strip() == msg_error:
             result=''
+            
+            
     else:
-        print('Not title found:',strIdThesis)
-        result=''    
+        print('Custom error ID:',strIdThesis)
+        result=''
+        
     return  result
 
+
 def getCompleteDate(pub_date):
+    pub_date=pub_date.strip()
     if pub_date!='':
-        if pub_date.find(':')!=-1:
-            main_chunk=pub_date.split(':')
+        if pub_date.find(' ')!=-1:
             # Day month year and hour
-            data=main_chunk[1].strip()
-            chunks=data.split(' ')
-            day=str(chunks[1].strip())
-            month=str(chunks[3].strip())
-            year=str(chunks[5].strip())     
-        elif pub_date.find(' ')!=-1:
             chunks=pub_date.split(' ')
-            month=chunks[0].strip()
-            year=chunks[2].strip()
+            #day=str(chunks[1].strip())
+            month=str(chunks[0].strip())
+            year=str(chunks[2].strip()) 
+        elif pub_date.find(':')!=-1:
+            chunks=pub_date.split(':')
+            date_chunk=str(chunks[1].strip())
+            data=date_chunk.split(' ')
+            month=str(data[3].strip())
+            day=str(data[1].strip())
+            year=str(data[5].strip())
         month_lower=month.lower()
         for item in ls_months:
             if month_lower==item:
@@ -332,8 +387,60 @@ def getCompleteDate(pub_date):
                 if len(month)==1:
                     month='0'+month
                     break
+                
+    completeDate=year+'-'+month+'-'+'01'                   
+    return completeDate
+
+"""
+Objecst to connect to DB
+'mc' prefix to know the variables from MongoConnection class
+
+"""
+
+def getIDLimit(sense,l_bot,l_top,period):
+    
+    """
+    if period==9:
+        strperiod='Novena Época'
+    if period==10:
+        strperiod='Décima Época'
+    """   
+    if period==0:
+        strperiod='None'
+    #Onwars for    
+    if(sense==1):
+        for x in range(l_bot,l_top):
+            res=searchInUrl(x,strperiod)
+            if res==1:
+                break
+                
+    #Backwards For             
+    if(sense==2):
+        for x in range(l_top,l_bot,-1): 
+            res=searchInUrl(x,strperiod)
+            if res==1:
+                break
+            
+def searchInUrl(x,strperiod):
+    strIdThesis=str(x) 
+    url="https://sjf.scjn.gob.mx/SJFSist/Paginas/DetalleGeneralV2.aspx?ID="+strIdThesis+"&Clase=DetalleTesisBL&Semanario=0"
+    response= requests.get(url)
+    status= response.status_code
+    if status==200:
+        print('ID:',str(x))
+        browser.get(url)
+        time.sleep(1)
+        thesis_html = BeautifulSoup(browser.page_source, 'lxml')
+        title=thesis_html.find('title')
+        title_text=title.text
+        if title_text.strip() != msg_error:
+            thesis_period=thesis_html.find(id='lblEpoca')
+            data=thesis_period.text
+            if data!='':
+                if data.strip()!='Décima Época' and data.strip()!='Novena Época':
+                    print('ID for ',strperiod,' found in :',strIdThesis)
+                    return 1
                     
-    return year+'-'+month+'-'+'01'
 
     
 class CassandraConnection():
@@ -342,60 +449,3 @@ class CassandraConnection():
     cc_pwd='P@ssw0rd33'
     cc_databaseID='9de16523-0e36-4ff0-b388-44e8d0b1581f'
         
-
-
-if __name__ == '__main__':
-    main()
-    
-#The following code may be useful again    
-"""
-Objecst to connect to DB
-'mc' prefix to know the variables from MongoConnection class
-
-"""
-"""
-class MongoConnection():
-    mc_user='admin'
-    mc_pwd='v9mIadQx6dWjVDZc'
-    mc_cluster='clustertest'
-"""
-
-"""
-mongoDBProcess:
-    Inserts a document (thesis) in database, this method inserts a new thesis only
-    if this doesn´t exist
-
-
-def mongoDBProcess(json_thesis):
-    
-    objMC=MongoConnection()
-    user=objMC.mc_user
-    pwd=objMC.mc_pwd
-    cluster=objMC.mc_.cluster
-    global thesis_added
-    result=''
-    client = MongoClient("mongodb+srv://"+user+":"+pwd+"@"+cluster+"-mlo2r.azure.mongodb.net/test?retryWrites=true&w=majority")
-    db = client['dbquart']
-    collection=db['all_thesis']
-    #Check if the thesis exists
-    
-    strID=json_thesis['ID']
-    strHeading=json_thesis['content']['heading']
-    
-    
-    
-    
-    result=collection.count_documents(
-                           {'ID':strID,
-                            'content.heading':strHeading}
-                           )
-       
-    
-    if result==0:
-       collection.insert_one(json_thesis)
-       thesis_added=True
-       
-       
-    return thesis_added 
-        
-"""
